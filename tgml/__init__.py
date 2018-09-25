@@ -2,7 +2,8 @@ from matplotlib import pyplot as plt
 from networkit import generators, overview, centrality
 from pymongo import MongoClient
 
-from src.loader.mongodbloader import MongoDBLoader
+from tgml.loader.mongodbloader import MongoDBLoader
+from tgml.validator.validator import Validator
 
 
 def run_test():
@@ -27,5 +28,8 @@ def plot_degree_distribution(graph):
     plt.plot(dd)
     plt.show()
 
+def test_generator():
+    Validator(10, 10).validate()
+
 if __name__ == '__main__':
-    classify()
+    test_generator()
