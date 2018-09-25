@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 from networkit import generators, overview, centrality
 from pymongo import MongoClient
 
-from tgml.loader.mongodbloader import MongoDBLoader
+from src.loader.mongodbloader import MongoDBLoader
 
 
 def run_test():
