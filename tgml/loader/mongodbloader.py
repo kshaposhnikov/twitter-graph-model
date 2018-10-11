@@ -25,7 +25,6 @@ class MongoDBLoader:
                     graph.addEdge(start_node, graph.addNode())
                 else:
                     graph.addEdge(start_node, leaf)
-            print(cur_depth)
             cur_depth += 1
 
         return graph

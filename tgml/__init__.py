@@ -5,6 +5,7 @@ from pymongo import MongoClient
 from tgml.loader.mongodbloader import MongoDBLoader
 from tgml.validator.validator import Validator
 
+import powerlaw
 
 def run_test():
     g = generators.ErdosRenyiGenerator(10, 0.5).generate()
@@ -13,9 +14,15 @@ def run_test():
 def classify():
     client = MongoClient('localhost', 27017)
     try:
+        print("Loading...")
         graph = MongoDBLoader(client).load()
+        print("Processing...")
         overview(graph)
-        plot_degree_distribution(graph)
+        dd = plot_degree_distribution(graph)
+        print("Calculate alpha")
+        alpha = powerlaw.Fit(dd).alpha
+        print("Alpha: {0}".format(alpha))
+        print("Done")
     finally:
         client.close()
 
@@ -27,9 +34,10 @@ def plot_degree_distribution(graph):
     plt.ylabel("number of nodes")
     plt.plot(dd)
     plt.show()
+    return dd
 
 def test_generator():
     Validator(10, 10).validate()
 
 if __name__ == '__main__':
-    test_generator()
+    classify()
