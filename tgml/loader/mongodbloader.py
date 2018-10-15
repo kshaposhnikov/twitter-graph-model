@@ -1,6 +1,9 @@
 import networkit
 from pymongo import MongoClient
 
+from tgml.util.modelconverter import ModelConverter
+from tgml.util.storage import GraphStorage
+
 
 class MongoDBLoader:
 
@@ -8,7 +11,7 @@ class MongoDBLoader:
         self.client = connection
         self.db = self.client['twitter-crawler']
 
-    def load(self, depth=0):
+    def load_full_graph(self, depth=0):
         graph = networkit.Graph()
         cur_depth = 0
         for node in self.db['graph2'].find():
@@ -28,3 +31,17 @@ class MongoDBLoader:
             cur_depth += 1
 
         return graph
+
+    def load_as_slice(self, size=10, item_size=1000):
+        res = list()
+        offset = 0
+        converter = ModelConverter()
+        for idx, slice_item in enumerate(range(size)):
+            source = self.db['graph2'].find().skip(0 + offset).limit(item_size + offset)
+            storage = GraphStorage()
+            converter.convert(source, storage)
+            res.append(storage.graph)
+            offset += item_size
+            print("\rLoaded {0}".format(idx))
+
+        return res

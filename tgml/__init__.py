@@ -15,7 +15,7 @@ def classify():
     client = MongoClient('localhost', 27017)
     try:
         print("Loading...")
-        graph = MongoDBLoader(client).load()
+        graph = MongoDBLoader(client).load_as_slice()
         print("Processing...")
         overview(graph)
         dd = plot_degree_distribution(graph)
