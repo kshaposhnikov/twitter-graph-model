@@ -1,9 +1,13 @@
 from matplotlib import pyplot as plt
-from networkit import generators, overview, centrality
+from networkit import generators, overview, centrality, components
 from pymongo import MongoClient
 
 from tgml.loader.mongodbloader import MongoDBLoader
+from tgml.util.graphhelper import get_giant_component
+from tgml.validator.characteristics import CharacteristicVector
 from tgml.validator.validator import Validator
+
+import logging
 
 import powerlaw
 
@@ -12,17 +16,30 @@ def run_test():
     overview(g)
 
 def classify():
+    logger = logging.getLogger("tgml")
+    logger.setLevel(logging.DEBUG)
+
     client = MongoClient('localhost', 27017)
     try:
-        print("Loading...")
-        graph = MongoDBLoader(client).load_as_slice()
-        print("Processing...")
-        overview(graph)
-        dd = plot_degree_distribution(graph)
-        print("Calculate alpha")
-        alpha = powerlaw.Fit(dd).alpha
-        print("Alpha: {0}".format(alpha))
-        print("Done")
+        logger.info("Loading...")
+        graph_set = MongoDBLoader(client).load_as_slice(item_size=120)
+        characteristics = CharacteristicVector()
+        for index, graph in enumerate(graph_set):
+            logger.info("Components")
+            tmp_graph = get_giant_component(graph)
+
+            logger.info("Processing graph {0} ...".format(index))
+            overview(tmp_graph)
+            plot_degree_distribution(tmp_graph)
+            #logger.info("Calculate alpha")
+            #alpha = powerlaw.Fit(dd).alpha
+            #logger.info("Alpha: {0}".format(alpha))
+
+            logger.info("Characteristics:")
+            logger.info(characteristics.build_vector(tmp_graph))
+
+            logger.info("****************************************")
+        logger.info("Done")
     finally:
         client.close()
 

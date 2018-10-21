@@ -1,6 +1,6 @@
 import networkit
 
-from tgml.validator.characteristics import CharacterisitcVector
+from tgml.validator.characteristics import CharacteristicVector
 from tgml.validator.generator.bagenerator import BAGenerator
 from tgml.validator.generator.ergenerator import ERGenerator
 
@@ -14,7 +14,7 @@ class Validator:
         self.edge_count = edge_count
 
     def validate(self):
-        builder = CharacterisitcVector()
+        builder = CharacteristicVector()
         for generator in self.generators:
             tmp_g = generator.generate(self.node_count, self.edge_count)
             res = builder.build_vector(tmp_g)
