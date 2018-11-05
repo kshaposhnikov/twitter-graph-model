@@ -5,6 +5,13 @@ import logging
 
 class CharacteristicVector:
 
+    def __init__(self):
+        pass
+
+    def characteristics_number(self):
+        return 9
+
+
     def build_vector(self, graph: Graph):
         logger = logging.getLogger("tgml.characteristics.build_vector")
         

@@ -24,14 +24,15 @@ def classify():
     client = MongoClient('localhost', 27017)
     try:
         logger.info("Loading...")
-        graph_set = MongoDBLoader(client).load_as_slice(item_size=120)
+        graph_set = MongoDBLoader(client).load_as_slice(size=3, item_size=50)
         characteristics = CharacteristicVector()
-        classifier = Classifier(10000, 20000).build_classifier()
+        classifier = Classifier(10000, 20000).build_classifiers()
         for index, graph in enumerate(graph_set):
             logger.info("Components")
             tmp_graph = get_giant_component(graph)
 
-            classifier.predict_proba(characteristics.build_vector(graph))
+            for c_name, c_value in characteristics.build_vector(tmp_graph):
+                classifier.predict_proba(c_value)
 
             logger.info("****************************************")
         logger.info("Done")
@@ -64,7 +65,7 @@ def plot_degree_distribution(graph):
 
 
 def test_generator():
-    Classifier(10, 10).build_classifier()
+    Classifier(10, 10).build_classifiers()
 
 
 def test_file():

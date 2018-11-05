@@ -1,5 +1,6 @@
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
+from tgml import get_giant_component
 from tgml.validator.characteristics import CharacteristicVector
 from tgml.validator.generator.bagenerator import BAGenerator
 from tgml.validator.generator.ergenerator import ERGenerator
@@ -13,15 +14,16 @@ class Classifier:
         self.edge_count = edge_count
         self.class_count = class_count
 
-    def build_classifier(self):
+    def build_classifiers(self):
         builder = CharacteristicVector()
         target_vectors = list()
-        classifier = LinearDiscriminantAnalysis(solver="eigen", shrinkage="auto")
+        classifier = [LinearDiscriminantAnalysis(solver="eigen", shrinkage="auto")
+                      for _ in range(builder.characteristics_number())]
         current_class = 0
         classes = list()
         for generator in self.generators:
             for i in range(self.class_count):
-                tmp_g = generator.generate(self.node_count, self.edge_count)
+                tmp_g = get_giant_component(generator.generate(self.node_count, self.edge_count))
                 target_vectors.append(builder.build_vector(tmp_g))
                 classes.append(current_class)
             current_class += 1
