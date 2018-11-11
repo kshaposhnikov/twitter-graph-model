@@ -1,9 +1,9 @@
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
-from tgml import get_giant_component
-from tgml.validator.characteristics import CharacteristicVector
-from tgml.validator.generator.bagenerator import BAGenerator
-from tgml.validator.generator.ergenerator import ERGenerator
+from util.graphhelper import get_giant_component
+from validator.characteristics import CharacteristicVector
+from validator.generator.bagenerator import BAGenerator
+from validator.generator.ergenerator import ERGenerator
 
 
 class Classifier:

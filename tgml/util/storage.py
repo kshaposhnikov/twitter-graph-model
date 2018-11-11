@@ -1,6 +1,6 @@
 import networkit
 
-from tgml.util.graphhelper import merge_db_line
+from util.graphhelper import merge_db_line
 
 
 class DBStorage:

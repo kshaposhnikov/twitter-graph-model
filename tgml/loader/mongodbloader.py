@@ -1,8 +1,8 @@
 import networkit
 from pymongo import MongoClient
 
-from tgml.util.modelconverter import ModelConverter
-from tgml.util.storage import GraphStorage
+from util.modelconverter import ModelConverter
+from util.storage import GraphStorage
 
 
 class MongoDBLoader:
