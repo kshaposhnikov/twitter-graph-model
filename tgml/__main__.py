@@ -29,7 +29,7 @@ def classify():
         logger.info("Loading...")
         graph_set = MongoDBLoader(client).load_as_slice(size=1, item_size=50)
         features = FeatureVector()
-        classifier = Classifier(10000, 20000, class_count=1).build_classifiers()
+        classifier = Classifier(10000, 20000, class_count=1).build_svc_classifier()
         for index, graph in enumerate(graph_set):
             logger.info("Components")
             tmp_graph = get_giant_component(graph)
