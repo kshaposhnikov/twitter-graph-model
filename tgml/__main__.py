@@ -20,16 +20,16 @@ def run_test():
     overview(g)
 
 
-def classify():
+def classify(class_count=3):
     logger = logging.getLogger("tgml")
     logger.setLevel(logging.DEBUG)
 
     client = MongoClient('localhost', 27017)
     try:
         logger.info("Loading...")
-        graph_set = MongoDBLoader(client).load_as_slice(size=1, item_size=50)
+        graph_set = MongoDBLoader(client).load_as_slice(size=class_count, item_size=50)
         features = FeatureVector()
-        classifier = Classifier(10000, 20000, class_count=1).build_svc_classifier()
+        classifier = Classifier(10000, 20000, class_count=class_count).build_svc_classifier()
         for index, graph in enumerate(graph_set):
             logger.info("Components")
             tmp_graph = get_giant_component(graph)

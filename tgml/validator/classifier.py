@@ -11,8 +11,8 @@ from networkit import overview
 
 import logging
 
-class Classifier:
 
+class Classifier:
     logger = logging.getLogger("tgml.validator.features.FeatureVector")
 
     generators = [BAGenerator(), ERGenerator()]
@@ -27,7 +27,6 @@ class Classifier:
         target_vectors = list()
         # classifier = LinearDiscriminantAnalysis(solver="eigen", shrinkage="auto")
         classifier = SVC(probability=True)
-        current_class = 0
         classes = list()
         for generator in self.generators:
             for i in range(self.class_count):
@@ -35,11 +34,9 @@ class Classifier:
                 tmp_g = get_giant_component(generator.generate(self.node_count, self.edge_count))
                 self.logger.debug(tmp_g.toString())
                 target_vectors.append(vector.build_vector_for_graph_as_list(tmp_g))
-                classes.append(current_class)
-            current_class += 1
+                classes.append(generator.get_name())
         classifier.fit(target_vectors, classes)
         return classifier
-
 
     def cross_vlidate(self, real_graphs):
         vector = FeatureVector()
@@ -53,9 +50,10 @@ class Classifier:
                 self.logger.debug(tmp_g.toString())
                 target_vectors.append(vector.build_vector_for_graph_as_list(tmp_g))
                 classes.append(generator.get_name())
-        
-        assert len(real_graphs) != self.class_count, 'Size of real_graphs list should be equal to class_count. ' \ 
-                                                     'Now real_graphs {0} and class_count {1}'.format(len(real_graphs), self.class_count)
+
+        assert len(real_graphs) != self.class_count, 'Size of real_graphs list should be equal to class_count. ' \
+                                                     'Now real_graphs {0} and class_count {1}'.format(len(real_graphs),
+                                                                                                      self.class_count)
 
         for real_graph in real_graphs:
             tmp_g = get_giant_component(real_graph)
