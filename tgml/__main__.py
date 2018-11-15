@@ -13,6 +13,9 @@ import powerlaw
 import sys
 
 from validator.features import FeatureVector
+from validator.generator.bagenerator import BAGenerator
+from validator.generator.chunglugenerator import CLGenerator
+from validator.generator.ergenerator import ERGenerator
 
 
 def run_test():
@@ -27,16 +30,27 @@ def classify(class_count=3):
     client = MongoClient('localhost', 27017)
     try:
         logger.info("Loading...")
-        graph_set = MongoDBLoader(client).load_as_slice(size=class_count, item_size=50)
+        graph_set = MongoDBLoader(client).load_as_slice(size=class_count, item_size=60)
         features = FeatureVector()
-        classifier = Classifier(10000, 20000, class_count=class_count).build_svc_classifier()
+
+        node_count = 1010
+
+        gens = [BAGenerator(node_count), ERGenerator(node_count), CLGenerator([graph_set[0].degree(v) for v in graph_set[0].nodes()])]
+        classifier = Classifier(gens, class_count=class_count).build_svc_classifier()
+        res = []
         for index, graph in enumerate(graph_set):
             logger.info("Components")
             tmp_graph = get_giant_component(graph)
-            print(classifier.predict_proba([features.build_vector_for_graph_as_list(tmp_graph)]))
+            vector = [features.build_vector_for_graph_as_list(tmp_graph)]
+            proba = classifier.predict_proba(vector)
+            print(proba)
+            print(classifier.predict(vector))
+            res.append(proba)
 
             logger.info("****************************************")
         logger.info("Done")
+
+        print(res)
     finally:
         client.close()
 

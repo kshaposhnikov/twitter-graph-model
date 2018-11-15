@@ -15,12 +15,9 @@ import logging
 class Classifier:
     logger = logging.getLogger("tgml.validator.features.FeatureVector")
 
-    generators = [BAGenerator(), ERGenerator()]
-
-    def __init__(self, node_count, edge_count, class_count=5):
-        self.node_count = node_count
-        self.edge_count = edge_count
+    def __init__(self, generators, class_count=5):
         self.class_count = class_count
+        self.generators = generators
 
     def build_svc_classifier(self):
         vector = FeatureVector()
@@ -31,7 +28,7 @@ class Classifier:
         for generator in self.generators:
             for i in range(self.class_count):
                 self.logger.debug('Current class number: #{0}'.format(i))
-                tmp_g = get_giant_component(generator.generate(self.node_count, self.edge_count))
+                tmp_g = get_giant_component(generator.generate())
                 self.logger.debug(tmp_g.toString())
                 target_vectors.append(vector.build_vector_for_graph_as_list(tmp_g))
                 classes.append(generator.get_name())
@@ -46,7 +43,7 @@ class Classifier:
         for generator in self.generators:
             for i in range(self.class_count):
                 self.logger.debug('Current class number: #{0}'.format(i))
-                tmp_g = get_giant_component(generator.generate(self.node_count, self.edge_count))
+                tmp_g = get_giant_component(generator.generate())
                 self.logger.debug(tmp_g.toString())
                 target_vectors.append(vector.build_vector_for_graph_as_list(tmp_g))
                 classes.append(generator.get_name())
