@@ -9,8 +9,8 @@ class ERGenerator:
         self.node_count = node_count
 
     def generate(self):
-        #networkit.setSeed(seed=time.clock(), useThreadId=True)
-        return networkit.generators.ErdosRenyiGenerator(self.node_count, 0.0005).generate()
+        networkit.setSeed(seed=time.clock(), useThreadId=False)
+        return networkit.generators.ErdosRenyiGenerator(self.node_count, 0.0002).generate()
 
 
     def get_name(self):

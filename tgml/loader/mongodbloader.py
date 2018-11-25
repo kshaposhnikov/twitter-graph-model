@@ -37,7 +37,7 @@ class MongoDBLoader:
         offset = 0
         converter = ModelConverter()
         for idx, slice_item in enumerate(range(size)):
-            source = self.db['graph2'].find().skip(0 + offset).limit(item_size + offset)
+            source = self.db['graph2'].find().skip(offset).limit(item_size + offset)
             storage = GraphStorage()
             converter.convert(source, storage)
             res.append(storage.graph)
@@ -45,3 +45,11 @@ class MongoDBLoader:
             print("\rLoaded {0}".format(idx))
 
         return res
+
+    def load_one(self, size, number):
+        converter = ModelConverter()
+        source = self.db['graph2'].find().skip((number * size) - size).limit(number * size)
+        storage = GraphStorage()
+        converter.convert(source, storage)
+
+        return storage.graph

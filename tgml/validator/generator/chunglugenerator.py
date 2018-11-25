@@ -9,7 +9,7 @@ class CLGenerator:
         self.deg_sequence = deg_sequence
 
     def generate(self):
-        #networkit.setSeed(seed=time.clock(), useThreadId=True)
+        networkit.setSeed(seed=time.clock(), useThreadId=False)
         return networkit.generators.ChungLuGenerator(self.deg_sequence).generate()
 
     def get_name(self):
