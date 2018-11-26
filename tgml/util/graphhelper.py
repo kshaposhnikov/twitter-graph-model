@@ -36,3 +36,11 @@ def get_giant_component(graph):
     )
     graph.setName(name)
     return graph
+
+
+def collection_to_list(collection):
+    tmp = []
+    for key, value in collection.items():
+        if key != '_id':
+            tmp.extend(value)
+    return tmp

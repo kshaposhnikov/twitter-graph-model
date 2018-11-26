@@ -53,3 +53,6 @@ class MongoDBLoader:
         converter.convert(source, storage)
 
         return storage.graph
+
+    def load_features(self, model, sample_number):
+        return self.db[model + '_features'].find().limit(sample_number)
