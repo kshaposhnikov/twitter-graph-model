@@ -1,20 +1,16 @@
-from pymongo import MongoClient
+from pymongo.cursor import Cursor
 
 
-def convert():
-    client = MongoClient('localhost', 27017)
-    db = client['twitter-crawler']
+class ModelConverter:
 
-    try:
+    def convert(self, source: Cursor, storage):
         existing_nodes = dict()
-        for node in db['graph'].find():
+        for node in source:
             if node['id'] in existing_nodes:
                 start_number = existing_nodes[node['id']]
             else:
                 start_number = len(existing_nodes)
                 existing_nodes[node['id']] = start_number
-
-            new_node = {'id': start_number, 'associatednodescount': node['associatednodescount']}
 
             leafs = list()
             for leaf in node['associatednodes']:
@@ -25,8 +21,10 @@ def convert():
                     existing_nodes[leaf] = tmp
                     leafs.append(tmp)
 
-            new_node['associatednodes'] = leafs
+            new_node = {
+                'id': start_number,
+                'associatednodescount': node['associatednodescount'],
+                'associatednodes': leafs
+            }
 
-            db['graph2'].insert_one(new_node)
-    finally:
-        client.close()
+            storage.store(new_node)
