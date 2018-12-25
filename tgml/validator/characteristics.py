@@ -6,7 +6,7 @@ import logging
 class CharacteristicVector:
 
     def __init__(self):
-        pass
+        self._characteristics = dict()
 
     def characteristics_number(self):
         return 9
@@ -47,3 +47,6 @@ class CharacteristicVector:
         logger.debug("Page Rank...")
         vector['page_rank'] = networkit.centrality.PageRank(graph).run().scores()
         return vector
+
+    def _n(self, graph: Graph):
+        return 'n'
