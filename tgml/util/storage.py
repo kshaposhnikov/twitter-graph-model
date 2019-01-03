@@ -1,16 +1,13 @@
 import networkit
 
+from loader.MongoGateway import gateway
 from util.graphhelper import merge_db_line
 
 
 class DBStorage:
 
-    def __init__(self, db, target_collection='graph2'):
-        self._db = db
-        self._target_collection = target_collection
-
     def store(self, node):
-        self._db[self._target_collection].insert_one(node)
+        gateway.graph2().insert_one(node)
         return
 
 

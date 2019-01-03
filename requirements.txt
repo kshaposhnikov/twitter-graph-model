@@ -1,3 +1,4 @@
+click
 scipy==1.1.0
 numpy==1.15.4
 cython==0.29
