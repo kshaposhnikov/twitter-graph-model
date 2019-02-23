@@ -42,11 +42,19 @@ class MongoDBLoader:
 
         return res
 
-    def load_one(self, size, number):
+    def load_real_graph_part(self, size, number):
         converter = ModelConverter()
         source = gateway.graph2().find().skip((number * size) - size).limit(number * size)
         storage = GraphStorage()
         converter.convert(source, storage)
+
+        return storage.graph
+
+    def load_one_from_collection(self, number, collection):
+        converter = ModelConverter()
+        source = collection.find().skip(number).limit(1)
+        storage = GraphStorage()
+        converter.convert(source[0]['nodes'], storage)
 
         return storage.graph
 

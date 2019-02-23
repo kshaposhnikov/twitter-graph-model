@@ -13,10 +13,28 @@ from validator.scalefree import ScaleFreeChecker
 
 
 @click.group(help='Graph Features')
-@click.option('--samples_count', default=10, help='Number of samples to calculate features.')
-@click.option('--start_position', default=0,  help="Start position in feature's vector")
+@click.option('--sample_count', default=10, help='Number of samples to calculate features.')
+@click.option('--start_position', default=0, help="Start position in feature's vector")
 def model_features():
     pass
+
+
+@model_features.command(help='Gather Bollobasi-Riordan Feature')
+@click.option('--sample_count', default=10, help='Number of samples to calculate features.')
+@click.option('--start_position', default=0, help="Start position in feature's vector")
+@click.option('--nodes_count', required=True, default=79999, help='Number of nodes in random graph.')
+def gather_br_features(sample_count, start_position, nodes_count=79999):
+    features_collection = gateway.get_collection("BR_features")
+    br_collection = gateway.get_collection("bollobas_riordan_30000")
+    loader = MongoDBLoader()
+    features = FeatureVector()
+    for number in range(start_position, sample_count):
+        graph = loader.load_one_from_collection(number, br_collection)
+        component = get_giant_component(graph)
+        component.removeSelfLoops()
+        overview(component)
+        #features.get_features[9].get_value(component)
+        features_collection.insert_one(features.build_vector_for_graph(component))
 
 
 @model_features.command(help='Gather Erdos-Renyi Feature')
@@ -37,7 +55,7 @@ def gather_cl_features(sample_count, node_count, start_position):
     d = []
     loader = MongoDBLoader()
     for number in range(sample_count):
-        graph = loader.load_one(node_count, number + 1)
+        graph = loader.load_real_graph_part(node_count, number + 1)
         d.append([graph.degree(v) for v in graph.nodes()])
 
     feature_vector = FeatureVector()
@@ -57,7 +75,7 @@ def gather_real_features(sample_count, node_count, start_position):
     features = FeatureVector()
     for number in range(start_position, sample_count):
         print(number)
-        component = get_giant_component(loader.load_one(node_count, number + 1))
+        component = get_giant_component(loader.load_real_graph_part(node_count, number + 1))
         overview(component)
         collection.insert_one(features.build_vector_for_graph(component))
 
