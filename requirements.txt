@@ -11,5 +11,6 @@ seaborn==0.9.0
 powerlaw==1.4.5
 scikit_learn==0.20.0
 sklearn
+ipython
 
 networkit==4.6

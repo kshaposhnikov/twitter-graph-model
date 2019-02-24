@@ -1,5 +1,5 @@
 import logging
-from _NetworKit import Graph, Diameter, EffectiveDiameter
+from _NetworKit import Graph, Diameter, EffectiveDiameter, TriangleEdgeScore
 
 import networkit
 import numpy
@@ -160,7 +160,7 @@ class ClosenessCentralityFeature(AbstractFeature):
     def get_value(self, graph: Graph):
         self.logger.debug('calculate closeness centrality')
         return self.process_centrality(
-            networkit.centrality.Closeness(graph).run().scores()
+            networkit.centrality.Closeness(graph, False, True).run().scores()
         )
 
 
@@ -186,3 +186,11 @@ class PageRankCentralityFeature(AbstractFeature):
         return self.process_centrality(
             networkit.centrality.PageRank(graph).run().scores()
         )
+
+class Triangles(AbstractFeature):
+
+    def __init__(self):
+        super(Triangles, self).__init__('triangles')
+
+    def get_value(self, graph: Graph):
+        self.logger.debug('calculate number of triangles')

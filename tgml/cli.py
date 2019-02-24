@@ -3,6 +3,7 @@ from networkit import overview
 
 from loader.MongoGateway import gateway
 from loader.mongodbloader import MongoDBLoader
+from loader.mongodbstorage import MongoDBStorage
 from util.graphhelper import get_giant_component
 from validator.features import FeatureVector
 from validator.generator.bagenerator import BAGenerator
@@ -38,19 +39,25 @@ def gather_br_features(sample_count, start_position, nodes_count=79999):
 
 
 @model_features.command(help='Gather Erdos-Renyi Feature')
-@click.option('--nodes_count', required=True, help='Number of nodes in random graph.')
+@click.option('--node_count', default=20000, required=True, help='Number of nodes in random graph.')
+@click.option('--sample_count', default=10, help='Number of samples to calculate features.')
+@click.option('--start_position', default=0, help="Start position in feature's vector")
 def gather_er_features(sample_count, node_count, start_position):
     gather_features(sample_count, start_position, ERGenerator(node_count))
 
 
 @model_features.command(help='Gather Barabasi-Albert Features')
-@click.option('--nodes_count', required=True, help='Number of nodes in random graph.')
+@click.option('--node_count', default=20000, required=True, help='Number of nodes in random graph.')
+@click.option('--sample_count', default=10, help='Number of samples to calculate features.')
+@click.option('--start_position', default=0, help="Start position in feature's vector")
 def gather_ba_features(sample_count, node_count, start_position):
     gather_features(sample_count, start_position, BAGenerator(node_count))
 
 
 @model_features.command(help='Gather Chung-Lu Features')
-@click.option('--nodes_count', required=True, help='Number of nodes in random graph.')
+@click.option('--node_count', default=20, required=True, help='Number of nodes in random graph.')
+@click.option('--sample_count', default=10, help='Number of samples to calculate features.')
+@click.option('--start_position', default=0, help="Start position in feature's vector")
 def gather_cl_features(sample_count, node_count, start_position):
     d = []
     loader = MongoDBLoader()
@@ -61,9 +68,11 @@ def gather_cl_features(sample_count, node_count, start_position):
     feature_vector = FeatureVector()
     for number in range(start_position, sample_count):
         generator = CLGenerator(d[number])
-        collection = gateway.get_collection(generator.get_name() + '_features')
+        collection = gateway.get_collection(generator.get_name() + '_features_new')
+        collection_graph = gateway.get_collection(generator.get_name() + '_graphs')
         component = get_giant_component(generator.generate())
         overview(component)
+        MongoDBStorage().storeGraph(collection_graph, component)
         collection.insert_one(feature_vector.build_vector_for_graph(component))
 
 
@@ -81,12 +90,14 @@ def gather_real_features(sample_count, node_count, start_position):
 
 
 def gather_features(sample_count, start_position, generator):
-    collection = gateway.get_collection(generator.get_name() + '_features')
+    collection_features = gateway.get_collection(generator.get_name() + '_features_new')
+    collection_graph = gateway.get_collection(generator.get_name() + '_graphs')
     feature_vector = FeatureVector()
     for number in range(start_position, sample_count):
         component = get_giant_component(generator.generate())
         overview(component)
-        collection.insert_one(feature_vector.build_vector_for_graph(component))
+        MongoDBStorage().storeGraph(collection_graph, component)
+        collection_features.insert_one(feature_vector.build_vector_for_graph(component))
 
 
 @click.group()
