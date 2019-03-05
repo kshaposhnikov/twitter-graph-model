@@ -22,12 +22,19 @@ class FeatureVector:
             BetweennessCentralityFeature(),
             ClosenessCentralityFeature(),
             KatzCentralityFeature(),
-            PageRankCentralityFeature()
+            PageRankCentralityFeature(),
+            Triangles()
         ]
 
     @property
     def get_features(self):
         return self._features
+
+    def get_feature(self, name):
+        for feature in self._features:
+            if name == feature.get_name:
+                return feature
+        raise ValueError("There is no feature with name {0}".format(name))
 
     def build_vector_for_graph(self, graph: Graph):
         vector = dict()
@@ -110,7 +117,7 @@ class DiameterFeature(AbstractFeature):
 class EffectiveDiameterFeature(AbstractFeature):
 
     def __init__(self):
-        super(EffectiveDiameterFeature, self).__init__('diameter')
+        super(EffectiveDiameterFeature, self).__init__('effective_diameter')
 
     def get_value(self, graph: Graph):
         self.logger.debug('Calculate effective diameter')
@@ -120,7 +127,7 @@ class EffectiveDiameterFeature(AbstractFeature):
 class PowerlawAlphaFeature(AbstractFeature):
 
     def __init__(self):
-        super(PowerlawAlphaFeature, self).__init__('diameter')
+        super(PowerlawAlphaFeature, self).__init__('powerlaw')
 
     def get_value(self, graph: Graph):
         self.logger.debug('Calculate powerlaw')
@@ -187,6 +194,7 @@ class PageRankCentralityFeature(AbstractFeature):
             networkit.centrality.PageRank(graph).run().scores()
         )
 
+
 class Triangles(AbstractFeature):
 
     def __init__(self):
@@ -194,3 +202,9 @@ class Triangles(AbstractFeature):
 
     def get_value(self, graph: Graph):
         self.logger.debug('calculate number of triangles')
+        graph.indexEdges()
+        triangles = TriangleEdgeScore(graph).run().scores()
+        res = []
+        for item in self.process_centrality(triangles):
+            res.append(float(item))
+        return res
