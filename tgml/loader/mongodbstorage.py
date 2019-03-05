@@ -14,7 +14,7 @@ class MongoDBStorage:
             converted_graph["nodes"].append({
                 "id": node,
                 "associatednodescount": len(associatednodes),
-                "assocaitednodes": associatednodes
+                "associatednodes": associatednodes
             })
 
         collection.insert_one(converted_graph)

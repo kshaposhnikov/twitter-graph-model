@@ -12,6 +12,7 @@ from validator.generator.ergenerator import ERGenerator
 from validator.classifier import InflightClassifier, PairClassifier
 from validator.scalefree import ScaleFreeChecker
 
+feature_collection_suffix = '_features_new'
 
 @click.group(help='Graph Features')
 @click.option('--sample_count', default=10, help='Number of samples to calculate features.')
@@ -68,7 +69,7 @@ def gather_cl_features(sample_count, node_count, start_position):
     feature_vector = FeatureVector()
     for number in range(start_position, sample_count):
         generator = CLGenerator(d[number])
-        collection = gateway.get_collection(generator.get_name() + '_features_new')
+        collection = gateway.get_collection(generator.get_name() + feature_collection_suffix)
         collection_graph = gateway.get_collection(generator.get_name() + '_graphs')
         component = get_giant_component(generator.generate())
         overview(component)
@@ -90,7 +91,7 @@ def gather_real_features(sample_count, node_count, start_position):
 
 
 def gather_features(sample_count, start_position, generator):
-    collection_features = gateway.get_collection(generator.get_name() + '_features_new')
+    collection_features = gateway.get_collection(generator.get_name() + feature_collection_suffix)
     collection_graph = gateway.get_collection(generator.get_name() + '_graphs')
     feature_vector = FeatureVector()
     for number in range(start_position, sample_count):
@@ -98,6 +99,27 @@ def gather_features(sample_count, start_position, generator):
         overview(component)
         MongoDBStorage().storeGraph(collection_graph, component)
         collection_features.insert_one(feature_vector.build_vector_for_graph(component))
+
+
+@model_features.command(help='Calculate specified feature for specified graph')
+@click.option('--feature', 'feature_name', required=True, help='Name of feature')
+@click.option('--model', required=True, help='Name of model. Currently available: ER, BR, BA, CL')
+@click.option('--sample_count', default=10, help='Number of samples to calculate features.')
+@click.option('--start_position', default=0, help="Start position in feature's vector")
+def gather_specific_feature(feature_name, model, sample_count, start_position):
+    vector = FeatureVector()
+    feature = vector.get_feature(feature_name)
+    graph_collection = gateway.get_collection(model + '_graphs')
+    feature_collection = gateway.get_collection(model + feature_collection_suffix)
+
+    loader = MongoDBLoader()
+    for number in range(start_position, sample_count):
+        graph = loader.load_one_from_collection(number, graph_collection)
+        component = get_giant_component(graph)
+        value = feature.get_value(component)
+
+        document_id = feature_collection.find().skip(number).limit(1)[0]['_id']
+        feature_collection.update({"_id": document_id}, {"$set": {feature_name: value}})
 
 
 @click.group()
