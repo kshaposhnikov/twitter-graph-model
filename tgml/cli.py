@@ -12,7 +12,7 @@ from validator.generator.ergenerator import ERGenerator
 from validator.classifier import InflightClassifier, PairClassifier
 from validator.scalefree import ScaleFreeChecker
 
-feature_collection_suffix = '_features_new'
+feature_collection_suffix = '_features'
 
 @click.group(help='Graph Features')
 @click.option('--sample_count', default=10, help='Number of samples to calculate features.')
@@ -103,18 +103,26 @@ def gather_features(sample_count, start_position, generator):
 
 @model_features.command(help='Calculate specified feature for specified graph')
 @click.option('--feature', 'feature_name', required=True, help='Name of feature')
-@click.option('--model', required=True, help='Name of model. Currently available: ER, BR, BA, CL')
+@click.option('--model', required=True, help='Name of model. Currently available: ER, BR, BA, CL, RG')
 @click.option('--sample_count', default=10, help='Number of samples to calculate features.')
 @click.option('--start_position', default=0, help="Start position in feature's vector")
 def gather_specific_feature(feature_name, model, sample_count, start_position):
     vector = FeatureVector()
+
+    if model == 'RG':
+        feature_collection = gateway.real_features()
+    else:
+        feature_collection = gateway.get_collection(model + feature_collection_suffix)
+
     feature = vector.get_feature(feature_name)
     graph_collection = gateway.get_collection(model + '_graphs')
-    feature_collection = gateway.get_collection(model + feature_collection_suffix)
 
     loader = MongoDBLoader()
     for number in range(start_position, sample_count):
-        graph = loader.load_one_from_collection(number, graph_collection)
+        if model == 'RG':
+            graph = loader.load_real_graph_part(60, number + 1)
+        else:
+            graph = loader.load_one_from_collection(number, graph_collection)
         component = get_giant_component(graph)
         value = feature.get_value(component)
 

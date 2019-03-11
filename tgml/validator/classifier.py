@@ -100,9 +100,9 @@ class PairClassifier:
         real_features = loader.load_features('real_graph', self.samples_number)
         classifier = self._svc_classifier(left_features, right_features)
 
-        y = [collection_to_list(real_feature) for real_feature in real_features]
+        y = [collection_to_list(self._exclude_feature(real_feature)) for real_feature in real_features]
         res = classifier.predict_proba(y)
-        self.logger.debug("Result: {0}".format(res))
+        #self.logger.debug("Result: {0}".format(res))
         return res
 
     def _svc_classifier(self, left, right):
@@ -114,11 +114,30 @@ class PairClassifier:
         x = []
         y = []
         for feature_set in left:
-            x.append(collection_to_list(feature_set))
+            x.append(collection_to_list(self._exclude_feature(feature_set)))
             y.append(1)
 
         for feature_set in right:
-            x.append(collection_to_list(feature_set))
+            x.append(collection_to_list(self._exclude_feature(feature_set)))
             y.append(2)
         classifier.fit(x, y)
         return classifier
+
+    def _exclude_feature(self, features: dict):
+        features_to_analyse = [
+            'diameter',
+            'clustering_centrality',
+            'betweenness_centrality',
+            'closeness_centrality',
+            'katz_centrality',
+            'page_rank_centrality',
+            'triangles',
+            'powerlaw'
+        ]
+
+        res = dict()
+        for key, value in features.items():
+            if key in features_to_analyse:
+                res[key] = value
+
+        return res
