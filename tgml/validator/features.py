@@ -111,7 +111,7 @@ class DiameterFeature(AbstractFeature):
 
     def get_value(self, graph: Graph):
         self.logger.debug('Calculate diameter')
-        return Diameter(graph).getDiameter()
+        return Diameter(graph).run().getDiameter()
 
 
 class EffectiveDiameterFeature(AbstractFeature):

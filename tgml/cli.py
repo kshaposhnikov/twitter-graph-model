@@ -1,6 +1,7 @@
 import click
 from networkit import overview
 
+from graphvisualizer import GraphVisualizer
 from loader.MongoGateway import gateway
 from loader.mongodbloader import MongoDBLoader
 from loader.mongodbstorage import MongoDBStorage
@@ -21,13 +22,14 @@ def model_features():
     pass
 
 
-@model_features.command(help='Gather Bollobasi-Riordan Feature')
+@model_features.command(help='Gather Features for Graph craeted by external generator')
+@click.option('--prefix', help='Prefix for Mongo Collection')
 @click.option('--sample_count', default=10, help='Number of samples to calculate features.')
 @click.option('--start_position', default=0, help="Start position in feature's vector")
 @click.option('--nodes_count', required=True, default=79999, help='Number of nodes in random graph.')
-def gather_br_features(sample_count, start_position, nodes_count=79999):
-    features_collection = gateway.get_collection("BR_features")
-    br_collection = gateway.get_collection("bollobas_riordan_30000")
+def gather_external_features(prefix, sample_count, start_position, nodes_count=79999):
+    features_collection = gateway.get_collection(prefix + "_features")
+    br_collection = gateway.get_collection(prefix + "_graphs")
     loader = MongoDBLoader()
     features = FeatureVector()
     for number in range(start_position, sample_count):
@@ -35,7 +37,6 @@ def gather_br_features(sample_count, start_position, nodes_count=79999):
         component = get_giant_component(graph)
         component.removeSelfLoops()
         overview(component)
-        #features.get_features[9].get_value(component)
         features_collection.insert_one(features.build_vector_for_graph(component))
 
 
@@ -165,6 +166,29 @@ def util():
 @util.command(help='Verify Scale Free type for real graph')
 def verify_scale_free():
     ScaleFreeChecker().check()
+
+
+@util.command(help='Verify Scale Free type for real graph')
+@click.option('--sample-number', default=0, help='Number of samples which will be loaded for both models')
+@click.option('--name', help='Model name like ER, BA, CL')
+def visualize_graph(name, sample_number):
+    models = {
+        'ER': 'Erdos-Renyi',
+        'CL': 'Chung-Lu',
+        'BA': 'Barabasi-Albert',
+        'BR': 'Bollobas-Riordan',
+        'BO': 'Buckley-Osthus',
+        'YAM': 'Updated-Buckley-Osthus'
+    }
+
+    loader = MongoDBLoader()
+    graph_collection = gateway.get_collection(name + '_graphs')
+    graph = loader.load_one_from_collection(sample_number, graph_collection)
+    for key, value in models.items():
+        if key in name:
+            GraphVisualizer().visualize(value, graph)
+            #GraphVisualizer().save_for_gephi(name + '.gexf', graph)
+            break
 
 
 commands = click.CommandCollection(sources=[model_features, classify, util])
