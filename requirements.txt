@@ -1,5 +1,5 @@
 click
-scipy==1.1.0
+scipy==1.10.0
 numpy==1.15.4
 cython==0.29
 pymongo==3.7.2
